@@ -8,6 +8,8 @@
  * @desc tokenize.ts
  */
 
+import { Location } from './types';
+
 const enum State {
   Literal,
   BeforeOpenTag,
@@ -43,6 +45,7 @@ export interface IToken {
   end: number;
   value: string;
   type: TokenKind;
+  loc: Location;
 }
 
 let state: State;
@@ -55,6 +58,10 @@ let char: number;
 let inScript: boolean;
 let inStyle: boolean;
 let offset: number;
+let lineFirstIndex: number;
+let lineStartNo: number;
+let columnStartNo: number;
+let lineNo: number;
 
 function makeCodePoints(input: string) {
   return {
@@ -118,8 +125,17 @@ function init(input: string) {
   inScript = false;
   inStyle = false;
   offset = 0;
+  lineFirstIndex = 0;
+  lineStartNo = 1;
+  columnStartNo = 1;
+  lineNo = 1;
 }
 
+function updateSectionStart(n: number) {
+  sectionStart = n;
+  lineStartNo = lineNo;
+  columnStartNo = n - lineFirstIndex + 1;
+}
 export function tokenize(input: string): IToken[] {
   init(input);
   while (index < bufSize) {
@@ -175,6 +191,10 @@ export function tokenize(input: string): IToken[] {
         break;
     }
     index++;
+    if (char === 10) {
+      lineNo++;
+      lineFirstIndex = index;
+    }
   }
   switch (state) {
     case State.Literal:
@@ -240,13 +260,31 @@ function emitToken(kind: TokenKind, newState = state, end = index) {
   }
   if (!((kind === TokenKind.Literal || kind === TokenKind.Whitespace) && end === sectionStart)) {
     // empty literal should be ignored
-    tokens.push({ type: kind, start: sectionStart, end, value });
+    tokens.push({
+      type: kind,
+      start: sectionStart,
+      end,
+      value,
+      loc: {
+        start: {
+          line: lineStartNo,
+          column: columnStartNo,
+        },
+        end: {
+          line: lineNo,
+          column: end - lineFirstIndex, // (end - 1) - lineStart + 1
+        },
+      },
+    });
+    // console.log(tokens[tokens.length - 1]);
   }
   if (kind === TokenKind.OpenTagEnd || kind === TokenKind.CloseTag) {
-    sectionStart = end + 1;
+    // sectionStart = end + 1;
+    updateSectionStart(end + 1);
     state = State.Literal;
   } else {
-    sectionStart = end;
+    // sectionStart = end;
+    updateSectionStart(end);
     state = newState;
   }
 }
@@ -262,7 +300,8 @@ function parseBeforeOpenTag() {
   if (inScript || inStyle) {
     if (char === Chars.Sl) {
       state = State.ClosingTag;
-      sectionStart = index + 1;
+      // sectionStart = index + 1;
+      updateSectionStart(index + 1);
     } else {
       state = State.Literal;
     }
@@ -271,22 +310,26 @@ function parseBeforeOpenTag() {
   if ((char >= Chars.La && char <= Chars.Lz) || (char >= Chars.Ua && char <= Chars.Uz)) {
     // <d
     state = State.OpeningTag;
-    sectionStart = index;
+    // sectionStart = index;
+    updateSectionStart(index);
   } else if (char === Chars.Sl) {
     // </
     state = State.ClosingTag;
     sectionStart = index + 1;
+    updateSectionStart(index + 1);
   } else if (char === Chars.Lt) {
     // <<
     emitToken(TokenKind.Literal);
   } else if (char === Chars.Ep) {
     // <!
     state = State.OpeningSpecial;
-    sectionStart = index;
+    // sectionStart = index;
+    updateSectionStart(index);
   } else if (char === Chars.Qm) {
     // <?
     // treat as short comment
-    sectionStart = index;
+    // sectionStart = index;
+    updateSectionStart(index);
     emitToken(TokenKind.OpenTag, State.InShortComment);
   } else {
     // <>

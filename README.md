@@ -83,8 +83,8 @@ function tokenize(input: string): IToken[];
     value: string;
     type: TokenKind;
     loc: {
-      start: { line: number; column: number; };
-      end: { line: number; column: number; };
+      line: number;
+      column: number;
     }
   }
   ```
@@ -192,8 +192,8 @@ function parse(input: string, options?: ParseOptions): INode[];
     start: number;
     end: number;
     loc: {
-      start: { line: number; column: number; };
-      end: { line: number; column: number; };
+      line: number;
+      column: number;
     }
   }
   ```

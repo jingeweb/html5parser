@@ -11,7 +11,7 @@
 
 import { noNestedTags, selfCloseTags } from './config';
 import { IToken, tokenize, TokenKind } from './tokenize';
-import { IAttribute, IAttributeValue, INode, ITag, IText, SyntaxKind } from './types';
+import { IAttribute, IAttributeValue, INode, ITag, IText, Location, SyntaxKind } from './types';
 import { getLineRanges, getPosition } from './utils';
 import { walk } from './walk';
 
@@ -65,6 +65,7 @@ function pushNode(_node: ITag | IText) {
     pushNode(_node);
   } else if (tagChain.tag.body) {
     tagChain.tag.end = _node.end;
+    tagChain.tag.loc.end = _node.loc.end;
     tagChain.tag.body.push(_node);
   }
 }
@@ -74,16 +75,31 @@ function pushTagChain(tag: ITag) {
   node = void 0;
 }
 
-function createLiteral(start = token.start, end = token.end, value = token.value): IText {
-  return { start, end, value, type: SyntaxKind.Text };
+function createLocation(loc: Location, startOffset: number, endOffset: number) {
+  let { start, end } = loc;
+  if (startOffset !== 0) {
+    start = { line: start.line, column: start.column + startOffset };
+  }
+  if (endOffset !== 0) {
+    end = { line: end.line, column: end.column + endOffset };
+  }
+  return {
+    start,
+    end,
+  };
+}
+function createLiteral(start = token.start, end = token.end, loc = token.loc, value = token.value): IText {
+  return { start, end, value, loc, type: SyntaxKind.Text };
 }
 
 function createTag(): ITag {
+  const loc = createLocation(token.loc, -1, 0);
   return {
     start: token.start - 1, // include <
     end: token.end,
+    loc,
     type: SyntaxKind.Tag,
-    open: createLiteral(token.start - 1), // not finished
+    open: createLiteral(token.start - 1, token.end, { ...loc }), // not finished
     name: token.value,
     rawName: buffer.substring(token.start, token.end),
     attributes: [],
@@ -97,6 +113,7 @@ function createAttribute(): IAttribute {
   return {
     start: token.start,
     end: token.end,
+    loc: token.loc,
     name: createLiteral(),
     value: void 0,
   };
@@ -106,7 +123,8 @@ function createAttributeValue(): IAttributeValue {
   return {
     start: token.start,
     end: token.end,
-    value: token.type === TokenKind.AttrValueNq ? token.value : token.value.substr(1, token.value.length - 2),
+    loc: token.loc,
+    value: token.type === TokenKind.AttrValueNq ? token.value : token.value.substring(1, token.value.length - 1),
     quote: token.type === TokenKind.AttrValueNq ? void 0 : token.type === TokenKind.AttrValueSq ? "'" : '"',
   };
 }
@@ -114,6 +132,7 @@ function createAttributeValue(): IAttributeValue {
 function appendLiteral(_node: IText | IAttributeValue = node as IText) {
   _node.value += token.value;
   _node.end = token.end;
+  _node.loc.end = token.loc.end;
 }
 
 function unexpected() {
@@ -148,6 +167,7 @@ function parseOpenTag() {
   let attr: IAttribute;
 
   const tag = createTag();
+  debugger;
   pushNode(tag);
   if (tag.name === '' || tag.name === '!' || tag.name === '!--') {
     tag.open.value = '<' + tag.open.value;
@@ -167,8 +187,9 @@ function parseOpenTag() {
           appendLiteral();
         }
       }
-      tag.close = createLiteral(token.start, token.end + 1, `${token.value}>`);
+      tag.close = createLiteral(token.start, token.end + 1, createLocation(token.loc, 0, 1), `${token.value}>`);
       tag.end = tag.close.end;
+      tag.loc.end = tag.close.loc.end;
     }
     return;
   }
@@ -176,6 +197,7 @@ function parseOpenTag() {
     token = tokens[index];
     if (token.type === TokenKind.OpenTagEnd) {
       tag.end = tag.open.end = token.end + 1;
+      tag.loc.end = tag.open.loc.end = createLocation(token.loc, 0, 1).end;
       tag.open.value = buffer.substring(tag.open.start, tag.open.end);
       if (token.value === '' && !selfCloseTags[tag.name]) {
         tag.body = [];
@@ -210,17 +232,18 @@ function parseOpenTag() {
       }
     } else if (state === OpenTagState.AfterEqual) {
       if (token.type !== TokenKind.Whitespace) {
-        attr!.value = createAttributeValue();
+        attr.value = createAttributeValue();
         if (token.type === TokenKind.AttrValueNq) {
           state = OpenTagState.InValue;
         } else {
-          attr!.end = attr!.value.end;
+          attr.end = attr.value.end;
           state = OpenTagState.BeforeAttr;
         }
       }
     } else {
       if (token.type === TokenKind.Whitespace) {
-        attr!.end = attr!.value!.end;
+        attr.end = attr.value.end;
+        attr.loc.end = attr.value.loc.end;
         state = OpenTagState.BeforeAttr;
       } else {
         appendLiteral(attr!.value);
@@ -240,8 +263,14 @@ function parseCloseTag() {
   if (!_context) {
     return;
   }
-  _context.tag.close = createLiteral(token.start - 2, token.end + 1, buffer.substring(token.start - 2, token.end + 1));
+  _context.tag.close = createLiteral(
+    token.start - 2,
+    token.end + 1,
+    createLocation(token.loc, -2, 1),
+    buffer.substring(token.start - 2, token.end + 1),
+  );
   _context.tag.end = _context.tag.close.end;
+  _context.tag.loc.end = _context.tag.close.loc.end;
   _context = _context.parent;
   tagChain = _context;
 }

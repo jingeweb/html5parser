@@ -21,10 +21,11 @@ interface ICase {
 
 export let tokenIndex = 0;
 
-export function token(value: string, type: TokenKind = TokenKind.Literal, start = tokenIndex) {
+export function token(value: string, type: TokenKind = TokenKind.Literal, start = tokenIndex, startColumn = start + 1) {
   const v = {
     start: start,
     end: start + value.length,
+    loc: { start: { line: 1, column: startColumn }, end: { line: 1, column: start + value.length } },
     value,
     type,
   };
@@ -220,8 +221,8 @@ const cases: ICase[] = [
     tokens: [
       token('script', TokenKind.OpenTag, 1),
       token('', TokenKind.OpenTagEnd),
-      token('</div>', TokenKind.Literal, tokenIndex + 1),
-      token('</script'),
+      token('</div>', TokenKind.Literal, tokenIndex + 1, tokenIndex + 4),
+      token('</script', TokenKind.Literal, tokenIndex, tokenIndex + 3),
       token('script ', TokenKind.CloseTag, tokenIndex + 2),
     ],
   },
@@ -231,8 +232,8 @@ const cases: ICase[] = [
     tokens: [
       token('style', TokenKind.OpenTag, 1),
       token('', TokenKind.OpenTagEnd),
-      token('</div>', TokenKind.Literal, tokenIndex + 1),
-      token('</style'),
+      token('</div>', TokenKind.Literal, tokenIndex + 1, tokenIndex + 4),
+      token('</style', TokenKind.Literal, tokenIndex, tokenIndex + 3),
       token('style ', TokenKind.CloseTag, tokenIndex + 2),
     ],
   },
@@ -242,6 +243,7 @@ describe('simple cases', () => {
   for (const _case of cases) {
     it(`case "${_case.name}"`, () => {
       const tokens = tokenize(_case.input);
+      // console.log(tokens[0].loc);
       assert.deepStrictEqual(tokens, _case.tokens);
     });
   }

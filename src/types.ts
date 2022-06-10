@@ -13,9 +13,18 @@ export enum SyntaxKind {
   Tag = 'Tag',
 }
 
+export interface LocationPosition {
+  line: number;
+  column: number;
+}
+export interface Location {
+  start: LocationPosition;
+  end: LocationPosition;
+}
 export interface IBaseNode {
   start: number;
   end: number;
+  loc: Location;
 }
 
 export interface IText extends IBaseNode {
