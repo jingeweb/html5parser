@@ -1,6 +1,6 @@
 # html5parser
 
-`@jinge/html5parser` is a super fast and tiny **HTML5** parser.
+`@jingeweb/html5parser` is a super fast and tiny **HTML5** parser.
 
 This package is forked from [html5parser](https://github.com/acrazing/html5parser) but add bellow updates:
 
@@ -37,15 +37,15 @@ This package is forked from [html5parser](https://github.com/acrazing/html5parse
 1. Package manager
 
    ```bash
-   npm i -S @jinge/html5parser
-   pnpm i @jinge/html5parser
-   yarn add @jinge/html5parser
+   npm i -S @jingeweb/html5parser
+   pnpm i @jingeweb/html5parser
+   yarn add @jingeweb/html5parser
    ```
 
 ## Quick start
 
 ```typescript jsx
-import { parse, walk, SyntaxKind } from '@jinge/html5parser';
+import { parse, walk, SyntaxKind } from '@jingeweb/html5parser';
 
 const ast = parse('<!DOCTYPE html><head><title>Hello html5parser!</title></head></html>');
 
