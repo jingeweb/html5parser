@@ -4,9 +4,9 @@
  */
 
 import { parse } from '../parse';
-import { tag, text } from '../parse.spec';
 import { tokenize, TokenKind } from '../tokenize';
-import { token, tokenIndex } from '../tokenize.spec';
+import { tag, text } from './parse.spec';
+import { token, tokenIndex } from './tokenize.spec';
 
 describe('issue #6', () => {
   it('should tokenize upper case tag to lower', () => {
@@ -18,16 +18,7 @@ describe('issue #6', () => {
   });
   it('should parse upper case as expected', () => {
     expect(parse('<Test></Test>')).toEqual([
-      tag(
-        '<Test></Test>',
-        'test',
-        text('<Test>', 0),
-        [],
-        [],
-        text('</Test>'),
-        0,
-        'Test',
-      ),
+      tag('<Test></Test>', 'test', text('<Test>', 0), [], [], text('</Test>'), 0, 'Test'),
     ]);
   });
 });

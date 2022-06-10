@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /*!
  *
  * Copyright 2017 - acrazing
@@ -50,7 +51,7 @@ function init(input?: string, options?: ParseOptions) {
   index = 0;
   tagChain = void 0;
   nodes = [];
-  token = void 0 as any;
+  // token = void 0;
   node = void 0;
   lines = void 0;
   parseOptions = options;
@@ -59,11 +60,7 @@ function init(input?: string, options?: ParseOptions) {
 function pushNode(_node: ITag | IText) {
   if (!tagChain) {
     nodes.push(_node);
-  } else if (
-    _node.type === SyntaxKind.Tag &&
-    _node.name === tagChain.tag.name &&
-    noNestedTags[_node.name]
-  ) {
+  } else if (_node.type === SyntaxKind.Tag && _node.name === tagChain.tag.name && noNestedTags[_node.name]) {
     tagChain = tagChain.parent;
     pushNode(_node);
   } else if (tagChain.tag.body) {
@@ -109,16 +106,8 @@ function createAttributeValue(): IAttributeValue {
   return {
     start: token.start,
     end: token.end,
-    value:
-      token.type === TokenKind.AttrValueNq
-        ? token.value
-        : token.value.substr(1, token.value.length - 2),
-    quote:
-      token.type === TokenKind.AttrValueNq
-        ? void 0
-        : token.type === TokenKind.AttrValueSq
-        ? "'"
-        : '"',
+    value: token.type === TokenKind.AttrValueNq ? token.value : token.value.substr(1, token.value.length - 2),
+    quote: token.type === TokenKind.AttrValueNq ? void 0 : token.type === TokenKind.AttrValueSq ? "'" : '"',
   };
 }
 
@@ -156,7 +145,7 @@ const enum OpenTagState {
 function parseOpenTag() {
   let state = OpenTagState.BeforeAttr;
 
-  let attr: IAttribute = void 0 as any;
+  let attr: IAttribute;
 
   const tag = createTag();
   pushNode(tag);
@@ -207,7 +196,7 @@ function parseOpenTag() {
       } else if (token.type === TokenKind.AttrValueEq) {
         state = OpenTagState.AfterEqual;
       } else {
-        appendLiteral(attr.name);
+        appendLiteral(attr!.name);
       }
     } else if (state === OpenTagState.AfterName) {
       if (token.type !== TokenKind.Whitespace) {
@@ -221,20 +210,20 @@ function parseOpenTag() {
       }
     } else if (state === OpenTagState.AfterEqual) {
       if (token.type !== TokenKind.Whitespace) {
-        attr.value = createAttributeValue();
+        attr!.value = createAttributeValue();
         if (token.type === TokenKind.AttrValueNq) {
           state = OpenTagState.InValue;
         } else {
-          attr.end = attr.value.end;
+          attr!.end = attr!.value.end;
           state = OpenTagState.BeforeAttr;
         }
       }
     } else {
       if (token.type === TokenKind.Whitespace) {
-        attr.end = attr.value!.end;
+        attr!.end = attr!.value!.end;
         state = OpenTagState.BeforeAttr;
       } else {
-        appendLiteral(attr.value);
+        appendLiteral(attr!.value);
       }
     }
   }
@@ -251,11 +240,7 @@ function parseCloseTag() {
   if (!_context) {
     return;
   }
-  _context.tag.close = createLiteral(
-    token.start - 2,
-    token.end + 1,
-    buffer.substring(token.start - 2, token.end + 1),
-  );
+  _context.tag.close = createLiteral(token.start - 2, token.end + 1, buffer.substring(token.start - 2, token.end + 1));
   _context.tag.end = _context.tag.close.end;
   _context = _context.parent;
   tagChain = _context;

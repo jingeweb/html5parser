@@ -9,8 +9,8 @@
  */
 
 import * as assert from 'assert';
-import { parse } from './parse';
-import { IAttribute, IAttributeValue, INode, ITag, IText, SyntaxKind } from './types';
+import { parse } from '../parse';
+import { IAttribute, IAttributeValue, INode, ITag, IText, SyntaxKind } from '../types';
 
 export let index = 0;
 
@@ -18,7 +18,7 @@ export function text(input: string, start = index): IText {
   return {
     type: SyntaxKind.Text,
     start: start,
-    end: index = input.length + start,
+    end: (index = input.length + start),
     value: input,
   };
 }
@@ -35,7 +35,7 @@ export function tag(
 ): ITag {
   return {
     start: start,
-    end: index = start + input.length,
+    end: (index = start + input.length),
     type: SyntaxKind.Tag,
     open: open,
     name: name,
@@ -50,7 +50,7 @@ export function tag(
 function attr(name: IText, value?: IAttributeValue): IAttribute {
   return {
     start: name.start,
-    end: index = value ? value.end : name.end,
+    end: (index = value ? value.end : name.end),
     name: name,
     value: value,
   };
@@ -59,7 +59,7 @@ function attr(name: IText, value?: IAttributeValue): IAttribute {
 function value(input: string, quote: undefined | "'" | '"', start = index): IAttributeValue {
   return {
     start: start,
-    end: index = start + (quote === void 0 ? 0 : 2) + input.length,
+    end: (index = start + (quote === void 0 ? 0 : 2) + input.length),
     value: input,
     quote: quote,
   };
@@ -196,15 +196,7 @@ const scenes: Array<{
                     128,
                   ),
                   text('\n      ', 145),
-                  tag(
-                    '<empty></empty>',
-                    'empty',
-                    text('<empty>', 152),
-                    [],
-                    [],
-                    text('</empty>', 159),
-                    152,
-                  ),
+                  tag('<empty></empty>', 'empty', text('<empty>', 152), [], [], text('</empty>', 159), 152),
                   text('\n    ', 167),
                 ],
                 text('</div>', 172),
@@ -227,84 +219,25 @@ const scenes: Array<{
     name: 'doctype',
     input: '<!doctype html><html></html>',
     nodes: [
-      tag(
-        '<!doctype html>',
-        '!doctype',
-        text('<!doctype html>', 0),
-        [attr(text('html', 10))],
-        void 0,
-        null,
-        0,
-      ),
+      tag('<!doctype html>', '!doctype', text('<!doctype html>', 0), [attr(text('html', 10))], void 0, null, 0),
       tag('<html></html>', 'html', text('<html>', 15), [], [], text('</html>', 21), 15),
     ],
   },
   {
     name: 'comments',
-    input:
-      '<!-- normal comment --><!- short comment -><! short-2 comment ><? qm comment ?><![CDATA[ cdata ]]>',
+    input: '<!-- normal comment --><!- short comment -><! short-2 comment ><? qm comment ?><![CDATA[ cdata ]]>',
     nodes: [
-      tag(
-        '<!-- normal comment -->',
-        '!--',
-        text('<!--', 0),
-        [],
-        [text(' normal comment ', 4)],
-        text('-->', 20),
-        0,
-      ),
-      tag(
-        '<!- short comment ->',
-        '!',
-        text('<!', 23),
-        [],
-        [text('- short comment -', 25)],
-        text('>', 42),
-        23,
-      ),
-      tag(
-        '<! short-2 comment >',
-        '!',
-        text('<!', 43),
-        [],
-        [text(' short-2 comment ', 45)],
-        text('>', 62),
-        43,
-      ),
-      tag(
-        '<? qm comment ?>',
-        '',
-        text('<', 63),
-        [],
-        [text('? qm comment ?', 64)],
-        text('>', 78),
-        63,
-      ),
-      tag(
-        '<![CDATA[ cdata ]]>',
-        '!',
-        text('<!', 79),
-        [],
-        [text('[CDATA[ cdata ]]', 81)],
-        text('>', 97),
-        79,
-      ),
+      tag('<!-- normal comment -->', '!--', text('<!--', 0), [], [text(' normal comment ', 4)], text('-->', 20), 0),
+      tag('<!- short comment ->', '!', text('<!', 23), [], [text('- short comment -', 25)], text('>', 42), 23),
+      tag('<! short-2 comment >', '!', text('<!', 43), [], [text(' short-2 comment ', 45)], text('>', 62), 43),
+      tag('<? qm comment ?>', '', text('<', 63), [], [text('? qm comment ?', 64)], text('>', 78), 63),
+      tag('<![CDATA[ cdata ]]>', '!', text('<!', 79), [], [text('[CDATA[ cdata ]]', 81)], text('>', 97), 79),
     ],
   },
   {
     name: 'normal comment special',
     input: '<!---- - -- ---->',
-    nodes: [
-      tag(
-        '<!---- - -- ---->',
-        '!--',
-        text('<!--', 0),
-        [],
-        [text('-- - -- --', 4)],
-        text('-->', 14),
-        0,
-      ),
-    ],
+    nodes: [tag('<!---- - -- ---->', '!--', text('<!--', 0), [], [text('-- - -- --', 4)], text('-->', 14), 0)],
   },
   {
     name: 'script',

@@ -1,14 +1,9 @@
 node_modules/
 .cache/
-temp/
+.tmp/
 *.log
-.DS_Store
-.DS_Store*
-*~
-.*~
-*.swp
-.*.swp
-*.tgz
+**/.DS_Store
 .idea/
 .vscode/
 dist/
+/lib/

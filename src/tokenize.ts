@@ -493,7 +493,5 @@ function parseClosingTag() {
 }
 
 function unexpected() {
-  throw new SyntaxError(
-    `Unexpected token "${buffer.charAt(index)}" at ${index} when parse ${state}`,
-  );
+  throw new SyntaxError(`Unexpected token "${buffer.charAt(index)}" at ${index} when parse ${state}`);
 }

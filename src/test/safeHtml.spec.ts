@@ -3,7 +3,7 @@
  * @author acrazing <joking.young@gmail.com>
  */
 
-import { safeHtml } from './safeHtml';
+import { safeHtml } from '../safeHtml';
 
 const htmlInput = `
 <div>

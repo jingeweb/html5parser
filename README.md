@@ -1,6 +1,13 @@
 # html5parser
 
-`html5parser` is a super fast and tiny **HTML5** parser.
+`@jinge/html5parser` is a super fast and tiny **HTML5** parser.
+
+This package is forked from [html5parser](https://github.com/acrazing/html5parser) but add bellow updates:
+
+* add location(line & column) info for token & nodes.
+* update dependencies
+* add eslint
+
 
 ## Highlights
 
@@ -30,24 +37,15 @@
 1. Package manager
 
    ```bash
-   npm i -S html5parser
-
-   # or var yarn
-   yarn add html5parser
-   ```
-
-2. CDN
-
-   ```html
-   <script src="https://unpkg.com/html5parser@latest/dist/html5parser.umd.js"></script>
+   npm i -S @jinge/html5parser
+   pnpm i @jinge/html5parser
+   yarn add @jinge/html5parser
    ```
 
 ## Quick start
 
-[![Edit html5parser - quick start](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/keen-wind-2mpwr?fontsize=14&hidenavigation=1&theme=dark)
-
 ```typescript jsx
-import { parse, walk, SyntaxKind } from 'html5parser';
+import { parse, walk, SyntaxKind } from '@jinge/html5parser';
 
 const ast = parse('<!DOCTYPE html><head><title>Hello html5parser!</title></head></html>');
 
@@ -84,6 +82,10 @@ function tokenize(input: string): IToken[];
     end: number;
     value: string;
     type: TokenKind;
+    loc: {
+      start: { line: number; column: number; };
+      end: { line: number; column: number; };
+    }
   }
   ```
 
@@ -189,6 +191,10 @@ function parse(input: string, options?: ParseOptions): INode[];
   export interface IBaseNode {
     start: number;
     end: number;
+    loc: {
+      start: { line: number; column: number; };
+      end: { line: number; column: number; };
+    }
   }
   ```
 

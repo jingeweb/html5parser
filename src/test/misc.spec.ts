@@ -8,35 +8,32 @@
  * @desc misc.spec.ts
  */
 
-import * as fs from 'fs-extra';
-import fetch from 'node-fetch';
-import * as path from 'path';
-import { parse } from './parse';
+import path from 'path';
+import fs from 'fs';
+import { execSync } from 'child_process';
+import { parse } from '../parse';
+
+const tmpDir = path.join(process.cwd(), '.tmp');
+execSync(`mkdir -p ${tmpDir}`);
 
 function run(url: string) {
   const id = url.replace(/[^\w\d]+/g, '_').replace(/^_+|_+$/g, '');
   return fetch(url)
     .then((r) => r.text())
     .then((d) => {
+      fs.writeFileSync(path.join(tmpDir, `${id}.html`), d);
       console.log('[FETCH:OK]: %s', url);
-      fs.outputFileSync(path.join(process.cwd(), 'temp', `${id}.html`), d);
       console.time('parse:' + url);
       const ast = parse(d);
       console.timeEnd('parse:' + url);
-      fs.outputJSONSync(path.join(process.cwd(), 'temp', `${id}.json`), ast, {
-        spaces: 2,
-      });
+      fs.writeFileSync(path.join(tmpDir, `${id}.json`), JSON.stringify(ast, null, 2));
     })
     .catch((err) => {
       console.error('[ERR]: %s, %s', id, err.message);
     });
 }
 
-const scenes = [
-  'https://www.baidu.com/',
-  'https://www.qq.com/?fromdefault',
-  'https://www.taobao.com/',
-];
+const scenes = ['http://www.baidu.com/', 'https://www.qq.com/?fromdefault', 'https://www.taobao.com/'];
 
 describe('real scenarios', () => {
   for (const scene of scenes) {

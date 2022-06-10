@@ -11,7 +11,7 @@
  */
 
 import * as assert from 'assert';
-import { IToken, tokenize, TokenKind } from './tokenize';
+import { IToken, tokenize, TokenKind } from '../tokenize';
 
 interface ICase {
   name: string;
@@ -147,11 +147,7 @@ const cases: ICase[] = [
   {
     name: 'normal comment',
     input: '<!-- hello world -->',
-    tokens: [
-      token('!--', TokenKind.OpenTag, 1),
-      token(' hello world '),
-      token('--', TokenKind.OpenTagEnd),
-    ],
+    tokens: [token('!--', TokenKind.OpenTag, 1), token(' hello world '), token('--', TokenKind.OpenTagEnd)],
   },
   {
     name: 'short comment',
@@ -203,10 +199,7 @@ const cases: ICase[] = [
   {
     name: 'close tag',
     input: '</div></ div >',
-    tokens: [
-      token('div', TokenKind.CloseTag, 2),
-      token(' div ', TokenKind.CloseTag, tokenIndex + 3),
-    ],
+    tokens: [token('div', TokenKind.CloseTag, 2), token(' div ', TokenKind.CloseTag, tokenIndex + 3)],
   },
   {
     name: 'special normal comment',

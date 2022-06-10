@@ -16,13 +16,13 @@ export interface WalkOptions {
 }
 
 function visit(node: INode, parent: INode | undefined, index: number, options: WalkOptions) {
-  options.enter && options.enter(node, parent, index);
+  options.enter?.(node, parent, index);
   if (node.type === SyntaxKind.Tag && Array.isArray(node.body)) {
     for (let i = 0; i < node.body.length; i++) {
       visit(node.body[i], node, i, options);
     }
   }
-  options.leave && options.leave(node, parent, index);
+  options.leave?.(node, parent, index);
 }
 
 export function walk(ast: INode[], options: WalkOptions) {
