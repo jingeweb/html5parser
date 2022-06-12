@@ -167,7 +167,7 @@ function parseOpenTag() {
   let attr: IAttribute;
 
   const tag = createTag();
-  debugger;
+
   pushNode(tag);
   if (tag.name === '' || tag.name === '!' || tag.name === '!--') {
     tag.open.value = '<' + tag.open.value;

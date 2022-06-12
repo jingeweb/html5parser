@@ -1,7 +1,7 @@
 {
   "name": "@jingeweb/html5parser",
   "description": "A super fast & tiny HTML5 parser",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "acrazing <joking.young@gmail.com>",
   "contributors": [
     "Yuhang Ge<abeyuhang@gmail.com>"
