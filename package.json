@@ -1,7 +1,7 @@
 {
   "name": "@jingeweb/html5parser",
   "description": "A super fast & tiny HTML5 parser",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "acrazing <joking.young@gmail.com>",
   "contributors": [
     "Yuhang Ge<abeyuhang@gmail.com>"
@@ -33,7 +33,7 @@
   "homepage": "https://github.com/jingeweb/html5parser#readme",
   "devDependencies": {
     "@types/jest": "^28.1.1",
-    "@types/node": "^17.0.41",
+    "@types/node": "^17.0.42",
     "@types/node-fetch": "^2.6.1",
     "@typescript-eslint/eslint-plugin": "^5.27.1",
     "@typescript-eslint/parser": "^5.27.1",
