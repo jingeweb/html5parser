@@ -5,8 +5,8 @@
 This package is forked from [html5parser](https://github.com/acrazing/html5parser) but add bellow updates:
 
 * add location(line & column) info for token & nodes.
-* update dependencies
-* add eslint
+* html tag token support underline char.
+* update dependencies & add eslint.
 
 
 ## Highlights

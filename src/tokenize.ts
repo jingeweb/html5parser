@@ -93,6 +93,7 @@ const enum Chars {
   Sl = 47, // /
   Gt = 62, // >
   Qm = 63, // ?
+  Ul = 95, // _
   La = 97, // a
   Lz = 122, // z
   Ua = 65, // A
@@ -307,7 +308,8 @@ function parseBeforeOpenTag() {
     }
     return;
   }
-  if ((char >= Chars.La && char <= Chars.Lz) || (char >= Chars.Ua && char <= Chars.Uz)) {
+
+  if (char === Chars.Ul || (char >= Chars.La && char <= Chars.Lz) || (char >= Chars.Ua && char <= Chars.Uz)) {
     // <d
     state = State.OpeningTag;
     // sectionStart = index;
